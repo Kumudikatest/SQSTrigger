@@ -50,10 +50,10 @@
         "children": [],
         "isRemovable": true,
         "filePath": "SQSTrigger/sendSNSmessages.js",
-        "code": "let AWS = require('aws-sdk');\nconst sns = new AWS.SNS();\n\nexports.handler = function (event, context, callback) {\n    event.Records.forEach((record) => {\n        console.log('Queue record: ', JSON.stringify(record, null, 2));\n        if (record.eventName == 'sendMessage') {\n            sns.publish({\n                Message: 'Test sqs as a trigger',\n                Subject: 'Test',\n                MessageAttributes: {},\n                MessageStructure: 'String',\n                TopicArn: 'arn:aws:sns:us-east-1:318300609668:dynamodb'\n            }).promise()\n                .then(data => {\n                    // your code goes here\n                })\n                .catch(err => {\n                    // error handling goes here\n                });\n        }\n    });\n    callback(null, { \"message\": \"Successfully executed\" });\n};",
+        "code": "let AWS = require('aws-sdk');\nconst sns = new AWS.SNS();\n\nexports.handler = function (event, context, callback) {\n    event.Records.forEach((record) => {\n        console.log('Queue record: ', JSON.stringify(record, null, 2));\n        if (record.eventSourceARN == 'arn:aws:sqs:us-east-1:318300609668:anomalyDetectionQueue') {\n            sns.publish({\n                Message: 'Test sqs as a trigger',\n                Subject: 'Test',\n                MessageAttributes: {},\n                MessageStructure: 'String',\n                TopicArn: 'arn:aws:sns:us-east-1:318300609668:dynamodb'\n            }).promise()\n                .then(data => {\n                    // your code goes here\n                })\n                .catch(err => {\n                    // error handling goes here\n                });\n        }\n    });\n    callback(null, { \"message\": \"Successfully executed\" });\n};",
         "triggers": [
           {
-            "resourceName": "sqsanomalyDetectionQueue",
+            "resourceName": "sqsudithTestQueue",
             "config": {
               "BatchSize": "10"
             }
@@ -75,7 +75,7 @@
       "2edc97fe-19af-4569-b972-1fb9c58c7f02",
       "b794fe27-ef40-4c13-acde-551d7c61b465"
     ],
-    "currentFileId": "2edc97fe-19af-4569-b972-1fb9c58c7f02",
+    "currentFileId": "b794fe27-ef40-4c13-acde-551d7c61b465",
     "resources": {
       "sqsanomalyDetectionQueue": {
         "name": "sqsanomalyDetectionQueue",
@@ -111,6 +111,28 @@
           "subscriptions": []
         },
         "globallyEditable": true
+      },
+      "sqsudithTestQueue": {
+        "name": "sqsudithTestQueue",
+        "type": "SQS",
+        "config": {
+          "mode": 1,
+          "existing": true,
+          "name": "udith-test-queue",
+          "url": "https://sqs.us-east-1.amazonaws.com/318300609668/udith-test-queue",
+          "selectedRegion": "us-east-1",
+          "deliveryDelay": "0",
+          "deliveryDelayUnit": "seconds",
+          "queueType": "standardQueue",
+          "defaultVisibilityTimeout": "30",
+          "defaultVisibilityTimeoutUnit": "seconds",
+          "messageRetentionPeriod": "345600",
+          "messageRetentionPeriodUnit": "seconds",
+          "maximumMessageSize": 256,
+          "receiveMessageWaitTime": "0",
+          "queueARN": "arn:aws:sqs:us-east-1:318300609668:udith-test-queue"
+        },
+        "globallyEditable": false
       }
     },
     "customTemplate": {
@@ -151,7 +173,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1553846541456
+    "lastSave": 1553849477345
   },
   "VCS_STATE": {
     "provider": "GitHub",
