@@ -1,0 +1,163 @@
+{
+  "EDITOR_STATE": {
+    "allProjectFiles": {
+      "ac0d8533-178d-42ef-9533-663feaf79913": {
+        "id": "ac0d8533-178d-42ef-9533-663feaf79913",
+        "parent": null,
+        "name": "SQSTrigger",
+        "type": "DIRECTORY",
+        "isDirectory": true,
+        "children": [
+          "2edc97fe-19af-4569-b972-1fb9c58c7f02",
+          "b794fe27-ef40-4c13-acde-551d7c61b465"
+        ],
+        "isRemovable": false,
+        "filePath": "SQSTrigger"
+      },
+      "2edc97fe-19af-4569-b972-1fb9c58c7f02": {
+        "id": "2edc97fe-19af-4569-b972-1fb9c58c7f02",
+        "parent": "ac0d8533-178d-42ef-9533-663feaf79913",
+        "name": "lambda.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "SQSTrigger/lambda.js",
+        "code": "let AWS = require('aws-sdk');\nlet SL_AWS = require('slappforge-sdk-aws');\nconst sqs = new SL_AWS.SQS(AWS);\n\nexports.handler = function (event, context, callback) {\n    sqs.sendMessage({\n        MessageBody: 'Test',\n        QueueUrl: `https://sqs.${process.env.AWS_REGION}.amazonaws.com/${process.env.SIGMA_AWS_ACC_ID}/anomalyDetectionQueue`,\n        DelaySeconds: '0',\n        MessageAttributes: {}\n    }, function (data) {\n        // your logic (logging etc) to handle successful message delivery, should be here\n    }, function (error) {\n        // your logic (logging etc) to handle failures, should be here\n    });\n    callback(null, { \"message\": \"Successfully executed\" });\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "handler": "handler",
+          "timeout": 30,
+          "memory": 128,
+          "layers": []
+        },
+        "testCases": {
+          "26fa79d3-d835-4a45-a75b-df2b8dfb8017": {
+            "id": "26fa79d3-d835-4a45-a75b-df2b8dfb8017",
+            "name": "Unnamed event",
+            "functionId": "2edc97fe-19af-4569-b972-1fb9c58c7f02",
+            "event": "{\n    \"key1\": \"value1\",\n    \"key2\": \"value2\",\n    \"key3\": \"value3\"\n}"
+          }
+        }
+      },
+      "b794fe27-ef40-4c13-acde-551d7c61b465": {
+        "id": "b794fe27-ef40-4c13-acde-551d7c61b465",
+        "parent": "ac0d8533-178d-42ef-9533-663feaf79913",
+        "name": "sendSNSmessages.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "SQSTrigger/sendSNSmessages.js",
+        "code": "let AWS = require('aws-sdk');\nconst sns = new AWS.SNS();\n\nexports.handler = function (event, context, callback) {\n    event.Records.forEach((record) => {\n        console.log('Queue record: ', JSON.stringify(record, null, 2));\n        if (record.eventName == 'sendMessage') {\n            sns.publish({\n                Message: 'Test sqs as a trigger',\n                Subject: 'Test',\n                MessageAttributes: {},\n                MessageStructure: 'String',\n                TopicArn: 'arn:aws:sns:us-east-1:318300609668:dynamodb'\n            }).promise()\n                .then(data => {\n                    // your code goes here\n                })\n                .catch(err => {\n                    // error handling goes here\n                });\n        }\n    });\n    callback(null, { \"message\": \"Successfully executed\" });\n};",
+        "triggers": [
+          {
+            "resourceName": "sqsanomalyDetectionQueue",
+            "config": {
+              "BatchSize": "10"
+            }
+          }
+        ],
+        "config": {
+          "runtime": "nodejs8.10",
+          "handler": "handler",
+          "timeout": 30,
+          "memory": 128,
+          "layers": []
+        },
+        "testCases": {}
+      }
+    },
+    "deletedFiles": [],
+    "rootNode": "ac0d8533-178d-42ef-9533-663feaf79913",
+    "openFiles": [
+      "2edc97fe-19af-4569-b972-1fb9c58c7f02",
+      "b794fe27-ef40-4c13-acde-551d7c61b465"
+    ],
+    "currentFileId": "2edc97fe-19af-4569-b972-1fb9c58c7f02",
+    "resources": {
+      "sqsanomalyDetectionQueue": {
+        "name": "sqsanomalyDetectionQueue",
+        "type": "SQS",
+        "config": {
+          "mode": 1,
+          "existing": true,
+          "name": "anomalyDetectionQueue",
+          "url": "https://sqs.us-east-1.amazonaws.com/318300609668/anomalyDetectionQueue",
+          "selectedRegion": "us-east-1",
+          "deliveryDelay": "0",
+          "deliveryDelayUnit": "seconds",
+          "queueType": "standardQueue",
+          "defaultVisibilityTimeout": "30",
+          "defaultVisibilityTimeoutUnit": "seconds",
+          "messageRetentionPeriod": "345600",
+          "messageRetentionPeriodUnit": "seconds",
+          "maximumMessageSize": 256,
+          "receiveMessageWaitTime": "0",
+          "queueARN": "arn:aws:sqs:us-east-1:318300609668:anomalyDetectionQueue"
+        },
+        "globallyEditable": false
+      },
+      "snsusEast1dynamodb": {
+        "name": "snsusEast1dynamodb",
+        "type": "SNS",
+        "config": {
+          "topicMode": 1,
+          "topicName": "dynamodb",
+          "topicArn": "arn:aws:sns:us-east-1:318300609668:dynamodb",
+          "topicRegion": "us-east-1",
+          "snsType": 0,
+          "subscriptions": []
+        },
+        "globallyEditable": true
+      }
+    },
+    "customTemplate": {
+      "dialect": null,
+      "definitions": {}
+    },
+    "envVariables": [
+      {
+        "lambdaId": "all",
+        "varKey": "SIGMA_AWS_ACC_ID",
+        "varValue": null,
+        "shouldPersist": false,
+        "displayOnly": false,
+        "editable": false
+      }
+    ],
+    "packageJSON": {
+      "dependencies": {
+        "slappforge-sdk-aws": {
+          "name": "slappforge-sdk-aws",
+          "version": "0.0.5",
+          "dev": false,
+          "notRemovable": false
+        },
+        "aws-sdk": {
+          "name": "aws-sdk",
+          "version": "2.176.0",
+          "dev": true,
+          "notRemovable": false
+        }
+      }
+    }
+  },
+  "PROJECT_META": {
+    "projectName": "SQSTrigger",
+    "projectDescription": "Test SQS as a trigger",
+    "projectVersion": "1.0.0",
+    "projectRegion": "us-east-1",
+    "platform": "AWS",
+    "platformRegions": {},
+    "lastSave": 1553846541456
+  },
+  "VCS_STATE": {
+    "provider": "GitHub",
+    "repo": {
+      "name": "SQSTrigger",
+      "url": "https://github.com/Kumudikatest/SQSTrigger"
+    }
+  }
+}
